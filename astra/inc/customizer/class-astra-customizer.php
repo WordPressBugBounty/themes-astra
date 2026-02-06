@@ -142,8 +142,20 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 				return false;
 			}
 
-			// Default to Astra customizer.
-			return true;
+			// Bail early if it is the Email Customizer Pro plugin customizer.
+			if ( isset( $_GET['sa_email_customizer'] ) && true == $_GET['sa_email_customizer'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+				return false;
+			}
+
+			/**
+			 * Allow third-party plugins to bail early from Astra customizer.
+			 *
+			 * @param bool $is_astra_customizer Whether the current request is for Astra customizer.
+			 *
+			 * @return bool True if it is Astra customizer, false otherwise.
+			 * @since 4.11.16
+			 */
+			return apply_filters( 'astra_is_astra_customizer', true );
 		}
 		/**
 		 * Constructor
@@ -1160,7 +1172,7 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 					'is_site_rtl'             => is_rtl(),
 					'defaults'                => $this->get_control_defaults(),
 					'isWP_5_9'                => astra_wp_version_compare( '5.8.99', '>=' ),
-					'googleFonts'             => Astra_Font_Families::get_google_fonts(),
+					'googleFonts'             => array(),
 					'variantLabels'           => Astra_Font_Families::font_variant_labels(),
 					'upgradeUrl'              => array(
 						'default'        => astra_get_upgrade_url( 'customizer' ),
@@ -1201,6 +1213,24 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 				ASTRA_THEME_URI . 'inc/assets/css/' . $font_icon_picker_css_file . '.css',
 				array( 'wp-components' ),
 				ASTRA_THEME_VERSION
+			);
+
+			$dir_name    = SCRIPT_DEBUG ? 'unminified' : 'minified';
+			$file_prefix = SCRIPT_DEBUG ? '' : '.min';
+			wp_enqueue_script(
+				'astra-google-fonts-loader',
+				ASTRA_THEME_URI . 'assets/js/' . $dir_name . '/customizer-google-fonts' . $file_prefix . '.js',
+				array( 'jquery', 'customize-controls' ),
+				ASTRA_THEME_VERSION,
+				true
+			);
+
+			wp_localize_script(
+				'astra-google-fonts-loader',
+				'astraCustomizer',
+				array(
+					'customizer_nonce' => wp_create_nonce( 'astra_customizer_nonce' ),
+				)
 			);
 		}
 
@@ -1873,6 +1903,7 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 
 			$js_prefix = '.min.js';
 			$dir       = 'minified';
+			/** @psalm-suppress RedundantCondition */
 			if ( SCRIPT_DEBUG ) {
 				$js_prefix = '.js';
 				$dir       = 'unminified';
