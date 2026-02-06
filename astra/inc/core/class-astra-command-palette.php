@@ -39,6 +39,16 @@ if ( ! class_exists( 'Astra_Command_Palette' ) ) {
 		 */
 		public function add_search_icon_to_admin_bar( $wp_admin_bar ) {
 
+			/**
+			 * Filter to enable/disable the search icon in admin bar.
+			 *
+			 * @since 4.12.3
+			 * @param bool $show_search_icon Whether to show the search icon. Default true.
+			 */
+			if ( ! apply_filters( 'astra_show_admin_bar_search_icon', true ) ) {
+				return;
+			}
+
 			if ( ! is_admin() ) {
 				return;
 			}
@@ -66,7 +76,6 @@ if ( ! class_exists( 'Astra_Command_Palette' ) ) {
 			$shortcut_key = $is_mac ? '⌘K' : 'Ctrl+K';
 
 			$title = '<span class="astra-search-icon">' . $search_icon . '</span>'
-				. '<span class="astra-search-text">' . esc_html__( 'Search Website Settings', 'astra' ) . '</span>'
 				. '<span class="astra-search-tooltip">' . esc_html__( 'Search everything: from site settings to pages and design tools', 'astra' ) . ' (' . esc_html( $shortcut_key ) . ')</span>';
 
 			$wp_admin_bar->add_node(
