@@ -75,6 +75,8 @@ class Astra_Menu {
 
 		add_action( 'admin_menu', array( $this, 'setup_menu' ) );
 		add_action( 'admin_init', array( $this, 'settings_admin_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_pricing_intent_script' ) );
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_pricing_intent_script' ) );
 
 		add_filter( 'install_plugins_tabs', array( $this, 'add_astra_woo_suggestions_link' ), 1 );
 		add_action( 'install_plugins_pre_astra-woo', array( $this, 'update_plugin_suggestions_tab_link' ) );
@@ -143,6 +145,58 @@ class Astra_Menu {
 			add_action( 'admin_enqueue_scripts', array( $this, 'styles_scripts' ) );
 			add_filter( 'admin_footer_text', array( $this, 'astra_admin_footer_link' ), 99 );
 		}
+	}
+
+	/**
+	 * Enqueue an inline script that sets a sessionStorage flag whenever
+	 * the user opens any wpastra.com/pricing link — via window.open() or a plain anchor.
+	 * Skipped when Astra Pro is already active (no nudge needed).
+	 *
+	 * Hooked to admin_enqueue_scripts (restricted to Astra dashboard and post editor pages)
+	 * and customize_controls_enqueue_scripts for Customizer coverage.
+	 *
+	 * @since 4.13.0
+	 * @return void
+	 */
+	public function enqueue_pricing_intent_script() {
+		if ( defined( 'ASTRA_EXT_VER' ) ) {
+			return;
+		}
+
+		$script = <<<'JS'
+(function () {
+	const KEY = 'astraPricingVisited';
+	const PATTERN = 'wpastra.com/pricing';
+
+	function markPricingIntent() {
+		const expires = new Date( Date.now() + 86400000 ).toUTCString();
+		document.cookie = KEY + '=1; expires=' + expires + '; path=/; SameSite=Strict';
+		window.dispatchEvent( new CustomEvent( 'astraPricingIntent' ) );
+	}
+
+	/* Intercept window.open() calls */
+	const _open = window.open;
+	window.open = function ( url ) {
+		if ( url && url.indexOf( PATTERN ) !== -1 ) {
+			markPricingIntent();
+		}
+		return _open.apply( this, arguments );
+	};
+
+	/* Intercept anchor clicks (capture phase catches React synthetic events too) */
+	document.addEventListener( 'click', function ( e ) {
+		const el = e.target && e.target.closest( 'a[href]' );
+		if ( el && el.href && el.href.indexOf( PATTERN ) !== -1 ) {
+			markPricingIntent();
+		}
+	}, true );
+}());
+JS;
+
+		// Attach to a guaranteed-present handle so WordPress always outputs the inline script.
+		// customize-controls is available on the customizer page; jquery covers all admin pages.
+		$handle = doing_action( 'customize_controls_enqueue_scripts' ) ? 'customize-controls' : 'jquery';
+		wp_add_inline_script( $handle, $script );
 	}
 
 	/**
@@ -341,6 +395,17 @@ class Astra_Menu {
 			'admin_url'               => admin_url( 'admin.php' ),
 			'home_slug'               => self::$plugin_slug,
 			'upgrade_url'             => astra_get_upgrade_url( 'dashboard' ),
+			'license_account_url'     => add_query_arg(
+				array(
+					'utm_source'   => 'astra',
+					'utm_medium'   => 'dashboard',
+					'utm_campaign' => 'upgrade',
+				),
+				is_callable( array( 'BSF_UTM_Analytics', 'get_utm_ready_link' ) )
+					? remove_query_arg( 'bsf', BSF_UTM_Analytics::get_utm_ready_link( 'https://store.brainstormforce.com/account/', 'astra' ) )
+					: 'https://store.brainstormforce.com/account/?utm_source=free-theme'
+			),
+			'license_help_url'        => astra_get_pro_url( '/docs/activate-astra-pro-addon-license/', 'free-theme', 'dashboard', 'upgrade' ),
 			'customize_url'           => admin_url( 'customize.php' ),
 			'astra_base_url'          => admin_url( 'admin.php?page=' . self::$plugin_slug ),
 			'logo_url'                => apply_filters( 'astra_admin_menu_icon', ASTRA_THEME_URI . 'inc/assets/images/astra-logo.svg' ),
@@ -382,7 +447,7 @@ class Astra_Menu {
 			'bsfUsageTrackingUrl'     => 'https://store.brainstormforce.com/usage-tracking/?utm_source=astra&utm_medium=dashboard&utm_campaign=usage_tracking',
 			'rest_url'                => rest_url(),
 			'current_username'        => wp_get_current_user()->user_login,
-			'application_passwords_url' => admin_url( 'user-edit.php?user_id=' . get_current_user_id() . '#application-passwords-section' ),
+			'application_passwords_url' => admin_url( 'profile.php#application-passwords-section' ),
 			'is_mcp_adapter_active'   => class_exists( 'WP\MCP\Plugin' ),
 			'site_builder_url'        => esc_url( admin_url( 'admin.php?page=theme-builder-free' ) ),
 		);

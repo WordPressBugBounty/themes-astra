@@ -1520,7 +1520,7 @@ if ( ! function_exists( 'astra_header_break_point' ) ) {
 	 *
 	 * @since 1.4.0 Added Mobile Header Breakpoint option from customizer.
 	 * @since 1.0.0
-	 * @return number
+	 * @return int
 	 */
 	function astra_header_break_point() {
 		$mobile_header_brakpoint = true === Astra_Builder_Helper::$is_header_footer_builder_active ? astra_get_tablet_breakpoint() : astra_get_option( 'mobile-header-breakpoint', 921 );

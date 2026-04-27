@@ -608,12 +608,12 @@ astScrollToTopHandler = function ( masthead, astScrollTop ) {
 	/* Add break point Class and related trigger */
 	var updateHeaderBreakPoint = function () {
 
-		// Content overrflowing out of screen can give incorrect window.innerWidth.
-		// Adding overflow hidden and then calculating the window.innerWidth fixes the problem.
-		var originalOverflow = body.style.overflow;
-		body.style.overflow = 'hidden';
+		// Use clientWidth directly. The overflow:hidden trick previously used here
+		// caused a visible content jump (scrollbar flash) after the breakpoint class
+		// was pre-applied by the early inline script in wp_body_open. Since
+		// document.documentElement.clientWidth is not affected by content overflow
+		// (unlike window.innerWidth), the overflow manipulation is not needed.
 		var ww = get_window_width();
-		body.style.overflow = originalOverflow;
 
 		var break_point = astra.break_point;
 
@@ -647,6 +647,7 @@ astScrollToTopHandler = function ( masthead, astScrollTop ) {
 	}
 
 	updateHeaderBreakPoint();
+	body.classList.add( 'ast-header-loaded' );
 
 	AstraToggleSubMenu = function( event ) {
 

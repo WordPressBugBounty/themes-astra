@@ -441,6 +441,7 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 		 */
 		public function print_footer_scripts() {
 			$output  = '<script type="text/javascript">';
+
 			$output .= '
 	        	wp.customize.bind(\'ready\', function() {
 	            	wp.customize.control.each(function(ctrl, i) {
@@ -1186,10 +1187,16 @@ if ( ! class_exists( 'Astra_Customizer' ) ) {
 						'blog-single'    => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'blog-single' ),
 						'blog-archive'   => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'blog-archive' ),
 						'hfb-pro-widget' => astra_get_pro_url( '/pricing/', 'free-theme', 'astra-header-footer', 'unlock-pro-widget' ),
+						'lifterlms'      => astra_get_pro_url( '/pricing/', 'free-theme', 'customizer', 'lifterlms' ),
 					),
 					/** @psalm-suppress RedundantCondition */
 					'is_woo_market_zip'       => ! ASTRA_THEME_ORG_VERSION,
 					'pro_active'              => defined( 'ASTRA_EXT_VER' ),
+					'pricingBar'              => ! defined( 'ASTRA_EXT_VER' ) ? array(
+						'text'       => __( "You\xe2\x80\x99re one step away \xe2\x80\x94 activate your license to access premium features.", 'astra' ),
+						'cta'        => __( 'Get your license now', 'astra' ),
+						'licenseUrl' => 'https://store.brainstormforce.com/account/?utm_source=free-theme&utm_medium=top-bar&utm_campaign=upgrade',
+					) : null,
 				/** @psalm-suppress RedundantCondition */
 				)
 			);

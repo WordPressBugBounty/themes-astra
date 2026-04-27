@@ -1,6 +1,13 @@
 *** Astra Changelog ***
 
-TBD - version 4.13.0
+2026-04-27 - version 4.13.1
+* Fix: Mini-cart not refreshing after add-to-cart on WooCommerce "Hand-picked Products" and "Products by Category" blocks.
+* Fix: Customizer strings reverting to admin language on the frontend when using different languages for Admin and Frontend with WPML.
+* Fix: Elementor compatibility CSS overriding Astra customizer toggle button color and background settings on Elementor pages.
+* Fix: Nested submenu hover styles bleeding up to parent menu items.
+* Fix: Header and content flicker (FOUC) on mobile with inline Logo + Site Title + Tagline header layout.
+
+2026-04-16 - version 4.13.0
 * New: Introduced MCP (Model Context Protocol) settings and Abilities API for AI-powered theme management. (https://wpastra.com/docs/astra-mcp/)
 * Improvement: Customizer performance overhaul — faster load times, smoother live preview, and fewer HTTP requests for a lighter, more responsive editing experience.
 * Improvement: Disabled Astra command palette search icon in admin bar for WordPress 7.0+ as it ships a built-in command palette.
