@@ -1,5 +1,12 @@
 *** Astra Changelog ***
 
+2026-05-20 - version 4.13.3
+* New: Added PowerfulDocs AI support widget to the Astra admin dashboard — accessible via the floating Astra icon.
+* Improvement: Compatibility with WordPress 7.0.
+* Improvement: Header Builder menu now respects astra_schema_enabled and astra_site_navigation_schema_enabled filters to control schema markup output.
+* Fix: WPML [wpml-string] shortcode translations falling back to the default language on the frontend after the 4.13.1 update.
+* Fix: WooCommerce star rating clipped to 4 out of 5 stars with the Legacy WooCommerce sidebar widget.
+
 2026-05-12 - version 4.13.2
 * New: Introduced `rem` unit support for line-height and letter-spacing in the Typography customizer controls for better accessibility — `rem` values scale with the user's browser font size preference, unlike fixed `px` values.
 * New: Added WP-CLI commands for managing the Abilities API — list, enable, disable, and inspect individual abilities directly from the command line.
